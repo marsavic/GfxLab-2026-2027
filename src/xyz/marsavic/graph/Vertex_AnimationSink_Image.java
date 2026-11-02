@@ -11,6 +11,7 @@ import javafx.scene.layout.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 import xyz.marsavic.functions.A1;
 import xyz.marsavic.geometry.Vector;
+import xyz.marsavic.gfxlab.Animation;
 import xyz.marsavic.gfxlab.ElementAnimationSink;
 import xyz.marsavic.gfxlab.UtilsGL;
 import xyz.marsavic.gfxlab.resources.Resources;
@@ -33,6 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class Vertex_AnimationSink_Image extends VBox implements Vertex {
+	// Using Image will give screen tearing, use Canvas instead.
 	
 	public final ElementAnimationSink element;
 
@@ -47,7 +49,7 @@ public class Vertex_AnimationSink_Image extends VBox implements Vertex {
 	private final Button btnSaveImage;
 	private final Label lblInfo;	
 
-	
+
 	private final Loop loop;
 	final A1<EventInvalidated> onInvalidated = this::invalidated;
 
@@ -116,7 +118,7 @@ public class Vertex_AnimationSink_Image extends VBox implements Vertex {
 		
 		loop = new Loop(this::loop);
 //		OnGC.setOnGC(this, () -> loop.demand(Loop.State.STOPPED));
-		
+
 		animationTimer.start();
 	}
 
@@ -129,58 +131,55 @@ public class Vertex_AnimationSink_Image extends VBox implements Vertex {
 			profilerTimer.measure(() -> demandUpdate());
 		}
 	};
-	
+
 	private void invalidated(EventInvalidated e) {
+		invalidated.set(true);
 		demandUpdate();
 	}
-	
-	
+
+
 	private final AtomicBoolean shouldUpdate = new AtomicBoolean(true);
-	
+	private final AtomicBoolean invalidated = new AtomicBoolean(true); // The input was invalidated since the last frame was requested.
+
 	private void demandUpdate() {
-//		System.out.println("demandUpdate");
 		synchronized (shouldUpdate) {
-//			System.out.println("demandUpdate synchronized");
 			shouldUpdate.set(true);
 			shouldUpdate.notifyAll();
 		}
 	}
-	
 
-	
+
+
 	private int iFrameNext = 0;
-	
+	private int iFrameDisplayed;  // The frame index of the displayed frame, as given by Frames.iFrame.
+
 	private void loop() {
-//		System.out.println("loop 0");
 		Utils.waitWhile(shouldUpdate, () -> !shouldUpdate.get(), () -> shouldUpdate.set(false));
-//		System.out.println("loop 1");
 		Utils.waitWhile(updating, updating::get, this::update);
-//		System.out.println("loop 2");
 	}
 
-	
+
 
 	private final Profiler profilerGetFrame = UtilsGL.profiler(this, "get frame");
 	private final BorrowManagerMap<WritableImage, Vector> images = new BorrowManagerMap<>(UtilsFX::createWritableImage, null);
 	
 	private Vector size2old = Vector.ZERO;
 	
-//	private final FB_O<Profiler> profilerSelector = p ->  p.name().matches(".*add sample.*");
-//	private final Comparator<Profiler> profilerComparator = Comparator.comparing(Profiler::lastEventAgo);
-	
 	final AtomicBoolean updating = new AtomicBoolean(false);
-	
+
 	private void update() {
+		Animation animation = element.in0.get();
+		int t = iFrameNext;
+		int iFrame = animation.iFrame(t);
+		if (!invalidated.getAndSet(false) && iFrame == iFrameDisplayed) {
+			return; // The next frame is the displayed one, and nothing changed.
+		}
+		iFrameNext++;
+		
 		updating.set(true);
 		UtilsFX.submitTask(
 				() -> {
-//						System.out.println("get frame start");
-						var rMI = profilerGetFrame.measure(() -> element.in0.get().at(iFrameNext++));
-//						System.out.println("get frame end");
-						synchronized (updating) {
-							updating.set(false);
-							updating.notifyAll();
-						}
+						var rMI = profilerGetFrame.measure(() -> animation.at(t));
 						return rMI;
 				},
 				rMI -> {
@@ -191,11 +190,16 @@ public class Vertex_AnimationSink_Image extends VBox implements Vertex {
 						rImage.release();
 					});
 					rMI.release();
-//					lblInfo.setText(String.format("%.1f", profilerGetFrame.eventsPerSecond()));
 					Vector size2new = UtilsFX.imageSize(imageView.getImage());
 					if (!Objects.equals(size2new, size2old)) {
 						size2old = size2new;
 						fireResized();
+					}
+					// The next frame is requested only after this one is drawn, so frames don't pile up when the FX thread is behind.
+					synchronized (updating) {
+						iFrameDisplayed = iFrame;
+						updating.set(false);
+						updating.notifyAll();
 					}
 				}
 		);
@@ -218,6 +222,6 @@ public class Vertex_AnimationSink_Image extends VBox implements Vertex {
 	
 	public final Dispatcher<EventResized> dispatcherResized = new Dispatcher<>();
 	public Reactions<EventResized> onResized() { return dispatcherResized.reactions(); }
-	public void fireResized() { dispatcherResized.fireAsync(new EventResized(), UtilsGL.parallelReactions.executorService()); }
+	public void fireResized() { dispatcherResized.fireAsync(new EventResized(), UtilsGL.parallelReactions); }
 	
 }

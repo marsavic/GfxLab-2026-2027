@@ -8,7 +8,7 @@ public class MatrixColor implements Matrix<Color> {
 	
 	private final int width, height;
 	private final int width3;
-	private final double[] data;  // Can change to float for performance.
+	private final double[] data;
 	
 	
 	public MatrixColor(Vector size, Color initialValue) {
@@ -84,14 +84,10 @@ public class MatrixColor implements Matrix<Color> {
 	
 	public void copyFrom(MatrixColor source) {
 		Array2.assertEqualSizes(this, source);
-		System.arraycopy(source.data, 0, data, 0, source.data.length);
-/*
-		// Optimize: Test if doing it in parallel is faster.
-		UtilsGL.parallel(height, y -> {
-			int o = y * width;
-			System.arraycopy(source.array(), o, data, o, width);
+		UtilsGL.parallel.parallel(height, y -> {
+			int i0 = y * width3;
+			System.arraycopy(source.data, i0, data, i0, width3);
 		});
-*/
 	}
 	
 	
@@ -118,7 +114,7 @@ public class MatrixColor implements Matrix<Color> {
 	public static void add(MatrixColor a, MatrixColor b, MatrixColor result) {
 		Array2.assertEqualSizes(result, a, b);
 
-		UtilsGL.parallel.parallel(result.height, y -> {        // TODO A block doesn't have to be a row, try other lengths.
+		UtilsGL.parallel.parallel(result.height, y -> {
 			int i0 = y * result.width3;
 			int i1 = i0 + result.width3;
 			for (int i = i0; i < i1; i++) {

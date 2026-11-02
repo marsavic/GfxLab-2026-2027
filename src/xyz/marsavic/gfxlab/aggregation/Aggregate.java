@@ -18,21 +18,25 @@ public class Aggregate {
 	private final Hash hash;
 	
 
-	private State state;
-	
-	
-	
+	private State state; // Read and replaced only while holding the monitor of this.
+
+	// Held for the whole addSample, so that samples are added one at a time and release waits for the current sample.
+	// The monitor of this is held only briefly, so that the average can be computed while a sample is being added.
+	private final Object lockSampling = new Object();
+
+
+
 	private record State(
 			int count,
 			Rr<Matrix<Color>> rSum
 	) {
-		private synchronized void release() {
+		private void release() {
 			if (rSum != null) {
 				rSum.release();
 			}
 		}
-		
-		private synchronized Rr<Matrix<Color>> avg() {
+
+		private Rr<Matrix<Color>> avg() {
 			if (count == 0) {
 				throw new IllegalStateException("No samples. Cannot compute average.");
 			}
@@ -70,64 +74,67 @@ public class Aggregate {
 		State stateOld = state;
 		state = stateNew;
 		stateOld.release();
+		notifyAll();
 	}
 	
 	
-	public synchronized void release() {
-		if (state != null) {
-			state.release();
+	public void release() {
+		synchronized (lockSampling) {
+			synchronized (this) {
+				if (state != null) {
+					state.release();
+				}
+			}
 		}
 	}
-	
-	
-	public synchronized void addSample() {
-		Hash hashFrame = hash.add(state.count);
-		
-		// Instead of rewriting the same "sum" matrix, we borrow a new one and release the old one. This is
-		// done to avoid dealing with concurrency issues. It would be faster and more memory efficient if we
-		// added the new sample in-place, but it's more troublesome.
-		
-		State stateOld = getState();
-		State stateNew = new State(stateOld.count + 1, UtilsGL.matricesColor.obtain(size, true));
-		int sizeX = size.xInt();
-		stateNew.rSum.a(mSumNew -> {
-			if (stateOld.count == 0) {                // For optimization only, no other reason to consider this case separately.
-				UtilsGL.parallel.parallelY(size, y -> {
-					RandomGenerator rng = hashFrame.add(y).rng();
-					for (int x = 0; x < sizeX; x++) {
-						Color c = colorFunction3.at(t + rng.nextDouble(), Vector.xy(x + rng.nextDouble(), y + rng.nextDouble()));
-						mSumNew.set(x, y, c);
-					}
-				});
-			} else {
-				stateOld.rSum.a(mSumOld -> {
-					UtilsGL.parallel.parallelY(size, y -> {
+
+
+	public void addSample() {
+		synchronized (lockSampling) {
+			// Instead of rewriting the same "sum" matrix, we borrow a new one and release the old one. This is
+			// done to avoid dealing with concurrency issues. It would be faster and more memory efficient if we
+			// added the new sample in-place, but it's more troublesome.
+
+			State stateOld = getState();
+			Hash hashFrame = hash.add(stateOld.count);
+			State stateNew = new State(stateOld.count + 1, UtilsGL.matricesColor.obtain(size, true));
+			int sizeX = size.xInt();
+			stateNew.rSum.a(mSumNew -> {
+				if (stateOld.count == 0) {                // For optimization only, no other reason to consider this case separately.
+					UtilsGL.parallelSampling.parallelY(size, y -> {
 						RandomGenerator rng = hashFrame.add(y).rng();
 						for (int x = 0; x < sizeX; x++) {
 							Color c = colorFunction3.at(t + rng.nextDouble(), Vector.xy(x + rng.nextDouble(), y + rng.nextDouble()));
-							mSumNew.set(x, y, mSumOld.at(x, y).add(c));
+							mSumNew.set(x, y, c);
 						}
 					});
-				});
-			}
-		});
-		
-		setState(stateNew);
-		
-		synchronized (this) {
-			this.notifyAll();
+				} else {
+					stateOld.rSum.a(mSumOld -> {
+						UtilsGL.parallelSampling.parallelY(size, y -> {
+							RandomGenerator rng = hashFrame.add(y).rng();
+							for (int x = 0; x < sizeX; x++) {
+								Color c = colorFunction3.at(t + rng.nextDouble(), Vector.xy(x + rng.nextDouble(), y + rng.nextDouble()));
+								mSumNew.set(x, y, mSumOld.at(x, y).add(c));
+							}
+						});
+					});
+				}
+			});
+
+			setState(stateNew);
 		}
 	}
-	
-	
-	public Rr<Matrix<Color>> avg() {
-		return getState().avg();
+
+
+	/** Computed while holding the monitor of this, so that addSample cannot replace and release the state in the meantime. */
+	public synchronized Rr<Matrix<Color>> avg() {
+		return state.avg();
 	}
-	
-	
+
+
 	/** If there are no samples, it will block while waiting for at least one sample before computing the average. */
 	public Rr<Matrix<Color>> avgAtLeastOne() {
-		return Utils.waitWhile(this, () -> getState() == null || getState().count == 0, this::getState).avg();
+		return Utils.waitWhile(this, () -> state.count == 0, this::avg);
 	}
 	
 	

@@ -1,5 +1,6 @@
 package xyz.marsavic.gfxlab.playground.colorfunctions;
 
+import xyz.marsavic.gfxlab.aggregation.AggregatorFrameLast;
 import xyz.marsavic.gfxlab.entry_points.*;
 import xyz.marsavic.geometry.Vector;
 import xyz.marsavic.gfxlab.Animation;
@@ -46,7 +47,7 @@ public class OrbitingDisk implements ColorFunction3 {
 		return
 				e(ToneMapping3.class,
 						new EAggregator(
-								e(AggregatorOneAhead::new),
+								e(AggregatorFrameLast::new),
 								e(OrbitingDisk.class, e(4.0)),
 								e(TransformationFromSize.ToGeometricFitT0_.class),
 								e(Vec3.xyz(60, 640, 640)),

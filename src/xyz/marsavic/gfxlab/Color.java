@@ -1,8 +1,9 @@
 package xyz.marsavic.gfxlab;
 
-import xyz.marsavic.gfxlab.math.*;
+import xyz.marsavic.gfxlab.math.Vec3;
 import xyz.marsavic.utils.Numeric;
 
+import java.util.function.DoublePredicate;
 import java.util.function.DoubleUnaryOperator;
 
 /**
@@ -65,19 +66,22 @@ public record Color(
 	}
 	
 	
+	// The Oklab matrices are those of CSS Color Module Level 4. The matrices between linear sRGB and LMS are its
+	// matrices between linear sRGB and XYZ multiplied by its matrices between XYZ and LMS.
+	
 	/** The color with the coordinates (l, a, b) in the perceptual Oklab color space. */
 	public static Color oklab(double l, double a, double b) {
-		double l_ = l + 0.3963377774 * a + 0.2158037573 * b;
-		double m_ = l - 0.1055613458 * a - 0.0638541728 * b;
-		double s_ = l - 0.0894841775 * a - 1.2914855480 * b;
+		double l_ = l + 0.3963377773761749 * a + 0.2158037573099136 * b;
+		double m_ = l - 0.1055613458156586 * a - 0.0638541728258133 * b;
+		double s_ = l - 0.0894841775298119 * a - 1.2914855480194092 * b;
 		
 		double cl = l_ * l_ * l_;
 		double cm = m_ * m_ * m_;
 		double cs = s_ * s_ * s_;
 		
-		double cr =  4.0767245293 * cl - 3.3072168827 * cm + 0.2307590544 * cs;
-		double cg = -1.2681437731 * cl + 2.6093323231 * cm - 0.3411344290 * cs;
-		double cb = -0.0041119885 * cl - 0.7034763098 * cm + 1.7068625689 * cs;
+		double cr =  4.076741636075958    * cl - 3.307711539258062  * cm + 0.2309699031821045  * cs;
+		double cg = -1.268437973285032    * cl + 2.6097573492876887 * cm - 0.34131937600265727 * cs;
+		double cb = -0.004196076138675557 * cl - 0.7034186179359363 * cm + 1.7076146940746117  * cs;
 		
 		return Color.rgb(cr, cg, cb);
 	}
@@ -88,8 +92,8 @@ public record Color(
 	}
 	
 	
-	/** The color with the hue h (in turns), chroma c, and lightness l in the Oklab color space. */
-	public static Color okhcl(double h, double c, double l) {
+	/** The color with the lightness l, chroma c, and hue h (in turns) in OkLCh, the cylindrical form of the Oklab color space. */
+	public static Color oklch(double l, double c, double h) {
 		return oklab(
 			l,
 			c * Numeric.cosT(h),
@@ -98,32 +102,32 @@ public record Color(
 	}
 	
 	
-	public static Color okhcl(Vec3 v) {
-		return okhcl(v.x(), v.y(), v.z());
+	public static Color oklch(Vec3 v) {
+		return oklch(v.x(), v.y(), v.z());
 	}
 	
 	
 	/** The coordinates (l, a, b) of this color in the Oklab color space. */
 	public Vec3 oklab() {
-		double l_ = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
-		double m_ = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
-		double s_ = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+		double l_ = Math.cbrt(0.412221469470763   * r + 0.5363325372617348 * g + 0.0514459932675022  * b);
+		double m_ = Math.cbrt(0.21190349581782522 * r + 0.6806995506452344 * g + 0.10739695353694055 * b);
+		double s_ = Math.cbrt(0.08830245919005643 * r + 0.2817188391361215 * g + 0.6299787016738221  * b);
 		
-		double okl = 0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_;
-		double oka = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_;
-		double okb = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_;
+		double okl = 0.210454268309314  * l_ + 0.7936177747023054 * m_ - 0.0040720430116193 * s_;
+		double oka = 1.9779985324311684 * l_ - 2.42859224204858   * m_ + 0.450593709617411  * s_;
+		double okb = 0.0259040424655478 * l_ + 0.7827717124575296 * m_ - 0.8086757549230774 * s_;
 		
 		return Vec3.xyz(okl, oka, okb);
 	}
 	
 	
-	/** The coordinates (h, c, l) of this color in the cylindrical form of the Oklab color space. */
-	public Vec3 okhcl() {
+	/** The coordinates (l, c, h) of this color in OkLCh, the cylindrical form of the Oklab color space. */
+	public Vec3 oklch() {
 		Vec3 oklab = oklab();
 		
 		double c = Math.sqrt(oklab.y() * oklab.y() + oklab.z() * oklab.z());
 		double h = Numeric.atan2T(oklab.z(), oklab.y());
-		return Vec3.xyz(h, c, oklab.x());
+		return Vec3.xyz(oklab.x(), c, h);
 	}
 	
 	
@@ -247,10 +251,13 @@ public record Color(
 	/** The 32-bit ARGB code of this color, with 8-bit sRGB encoded components; the components must be in [0, 1]. */
 	public int code() {
 		return
-				(0xFF000000)    |
-				(valueToByte(r) << 16) |
-				(valueToByte(g) <<  8) |
-				(valueToByte(b)      );
+				in01() ?
+						(0xFF000000          ) |
+						(valueToByte(r) << 16) |
+						(valueToByte(g) <<  8) |
+						(valueToByte(b)      )
+				:
+						CODE_DEBUG;
 	}
 	
 	
@@ -352,16 +359,67 @@ public record Color(
 		}
 	}
 	
-	
-	/** Encodes a linear component value in [0, 1] into a byte (0 to 255) by the sRGB encoding. */
-	public static int valueToByte(double x) {
-		return (int) (linearToSRGB(x) * 255 + 0.5);
-	}
-	
-	
+
 	/** Decodes a byte (0 to 255) of an sRGB encoded component into the linear value. */
 	public static double byteToValue(int x) {
 		return sRGBtoLinear(x / 255.0);
 	}
 	
+
+	private static int valueToByteByFormula(double x) {
+		return (int) (linearToSRGB(x) * 255 + 0.5);
+	}
+	
+	
+	/** Encodes a linear component value in [0, 1] into a byte (0 to 255) by the sRGB encoding. Value must be in [0, 1], otherwise an exception is thrown. */
+	public static int valueToByte(double x) {
+		int b = BYTE_AT_BUCKET[(int) (x * N_BUCKETS)];
+		return x >= BYTE_THRESHOLDS[b + 1] ? b + 1 : b;
+	}	
+	
+	
+	// valueToByte gives the same values as valueToByteByFormula without computing Math.pow. [0, 1] is split into
+	// N_BUCKETS buckets. Each bucket contains at most one threshold (a value at which the byte increases by 1), because
+	// the thresholds are at least 1 / (12.92 * 255) > 1 / N_BUCKETS apart. So the byte at the start of the bucket and
+	// one comparison with the next threshold give the byte.
+	
+	private static final int N_BUCKETS = 4096;
+	
+	/** BYTE_THRESHOLDS[k] is the smallest x for which valueToByteByFormula(x) >= k, for k from 1 to 255. BYTE_THRESHOLDS[256] is infinite. */
+	private static final double[] BYTE_THRESHOLDS = new double[257];
+	
+	/** BYTE_AT_BUCKET[i] is valueToByteByFormula at the smallest x for which (int) (x * N_BUCKETS) == i. */
+	private static final int[] BYTE_AT_BUCKET = new int[N_BUCKETS + 1];
+	
+	static {
+		for (int k = 1; k < 256; k++) {
+			int k_ = k;
+			BYTE_THRESHOLDS[k] = smallest(x -> valueToByteByFormula(x) >= k_);
+		}
+		BYTE_THRESHOLDS[256] = Double.POSITIVE_INFINITY;
+		for (int i = 0; i <= N_BUCKETS; i++) {
+			int i_ = i;
+			BYTE_AT_BUCKET[i] = valueToByteByFormula(smallest(x -> (int) (x * N_BUCKETS) >= i_));
+		}
+	}
+	
+	
+	/** The smallest x in [0, 1] for which p is true, where p is true at 1, and false then true as x increases. */
+	private static double smallest(DoublePredicate p) {
+		// A binary search on the bits of doubles, which are ordered as the doubles when nonnegative.
+		long lo = -1;
+		long hi = Double.doubleToLongBits(1.0);
+		while (hi - lo > 1) {
+			long mid = (lo + hi) >>> 1;
+			if (p.test(Double.longBitsToDouble(mid))) {
+				hi = mid;
+			} else {
+				lo = mid;
+			}
+		}
+		return Double.longBitsToDouble(hi);
+	}
+
+	
+	public static final int CODE_DEBUG = DEBUG.code();
 }

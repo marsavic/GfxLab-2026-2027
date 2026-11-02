@@ -1,13 +1,16 @@
 package xyz.marsavic.gfxlab;
 
-import xyz.marsavic.gfxlab.arrays.*;
 import xyz.marsavic.functions.FB_O;
 import xyz.marsavic.geometry.Vector;
+import xyz.marsavic.gfxlab.arrays.Matrix;
+import xyz.marsavic.gfxlab.arrays.MatrixColor;
+import xyz.marsavic.gfxlab.arrays.MatrixInts;
 import xyz.marsavic.resources.BorrowManagerMap;
 import xyz.marsavic.time.Profiler;
 import xyz.marsavic.utils.Parallel;
 
 import java.util.*;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 
 
@@ -79,8 +82,10 @@ final public class UtilsGL {
 		parallelism = p;		
 	}
 	
-	public static final Parallel parallel = new Parallel(new ForkJoinPool(parallelism));
+	public static final Parallel parallel          = new Parallel(new ForkJoinPool(parallelism));
 	public static final Parallel parallelReactions = new Parallel(new ForkJoinPool(parallelism));
+	public static final Parallel parallelSampling  = new Parallel(new ForkJoinPool(parallelism)); // Only for adding samples, so that building frames does not wait for them.
+	public static final Parallel parallelWaiting   = new Parallel(Executors.newVirtualThreadPerTaskExecutor()); // A virtual thread per task, for tasks that mostly wait for the other pools. Not for parallel loops, which would run in the common pool.
 	
 	
 	// ==================================================================================
@@ -89,7 +94,6 @@ final public class UtilsGL {
 
 	public static final BorrowManagerMap<Matrix<Color>, Vector> matricesColor = new BorrowManagerMap<>(
 			MatrixColor::new, (m, _sz) -> ((MatrixColor) m).fillBlack()
-//			MatrixObject::new, (m, _sz) -> m.fill(Color.BLACK)
 	);
 
 	public static final BorrowManagerMap<Matrix<Integer>, Vector> matricesInt = new BorrowManagerMap<>(

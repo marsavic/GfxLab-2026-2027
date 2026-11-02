@@ -14,10 +14,7 @@ import xyz.marsavic.functions.A1;
 import xyz.marsavic.geometry.Vector;
 import xyz.marsavic.gfxlab.ElementAnimationSink;
 import xyz.marsavic.gfxlab.resources.Resources;
-import xyz.marsavic.graph.Graph;
-import xyz.marsavic.graph.Vertex;
-import xyz.marsavic.graph.VertexInputJack;
-import xyz.marsavic.graph.Vertex_AnimationSink_Image;
+import xyz.marsavic.graph.*;
 import xyz.marsavic.javafx.UtilsFX;
 import xyz.marsavic.reactions.elements.Element;
 import xyz.marsavic.utils.FileWatcher;
@@ -82,15 +79,7 @@ public class App extends Application {
 	
 	void initGraph(Graph graph) {
 		var sink = new ElementAnimationSink(Setups.invoke(setupClass, "setupApp"));		
-		
 		addElements(graph, sink);
-		
-		// Adding onResized for animation sinks 
-		for (Vertex v : graph.vertices) {
-			if (v instanceof Vertex_AnimationSink_Image vas) {
-				vas.onResized().add(onResized);
-			}
-		}
 	}
 	
 	
@@ -115,7 +104,7 @@ public class App extends Application {
 		graph   .prefHeightProperty().bind(root.heightProperty());
 //		textArea.prefWidthProperty ().bind(root.widthProperty ());
 //		textArea.prefHeightProperty().bind(root.heightProperty());
-		textArea.setPrefWidth(750);
+		textArea.setPrefWidth(900);
 		textArea.setPrefHeight(250);
 		
 		info.layoutYProperty().bind(root.heightProperty().subtract(info.heightProperty()));
@@ -177,13 +166,6 @@ public class App extends Application {
 	
 	private void makeLayout() {
 		graph.makeLayout(Graph.layout1);
-	}
-	
-	
-	private final A1<Vertex_AnimationSink_Image.EventResized> onResized = this::onResized;
-	
-	private void onResized(Vertex_AnimationSink_Image.EventResized eventResized) {
-		Platform.runLater(this::makeLayout);
 	}
 	
 	

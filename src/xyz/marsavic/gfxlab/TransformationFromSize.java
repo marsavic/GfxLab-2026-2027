@@ -18,7 +18,7 @@ public interface TransformationFromSize extends F1<Transformation3, Vec3> {
 		@Override public Transformation3 at(Vec3 s) { return new ToIdentity(s); }
 	}
 	
-	/** The image to the unit square [0, 1]^2 (y down), the time to [0, 1). */
+	/** The image to the unit square [0, 1]^2 (y up), the time to [0, 1). */
 	class ToUnitBox_ implements TransformationFromSize {
 		@Override public Transformation3 at(Vec3 s) { return new ToUnitBox(s); }
 	}
@@ -54,19 +54,25 @@ public interface TransformationFromSize extends F1<Transformation3, Vec3> {
 	
 	
 	class ToUnitBox implements Transformation3.Independent0 {
+		private static final Vec3 u = Vec3.xyz(1, 1, -1);
+		
+		private static final Vec3 a = Vec3.xyz(0, 0, 1);
+		private static final double ax = a.x();
+		private static final Vector ap = a.p12();
+		
 		private final Vec3 m;
 		private final double mx;
 		private final Vector mp;
 		
 		public ToUnitBox(Vec3 s) {
-			this.m = s.reciprocal();
-			this.mx = m.x();
-			this.mp = m.p12();
+			m = u.div(s);
+			mx = m.x();
+			mp = m.p12();
 		}
 		
-		@Override public Vec3 at(Vec3 p) { return p.mul(m); }
-		@Override public double at(double x0) {return x0 * mx; }
-		@Override public Transformation2 slice0(double x0) {return p -> p.mul(mp); }
+		@Override public Vec3 at(Vec3 p) { return p.mulAdd(m, a); }
+		@Override public double at(double x0) { return x0 * mx + ax; }
+		@Override public Transformation2 slice0(double x0) { return p -> p.mulAdd(mp, ap); }
 	}
 	
 	// TODO Generalize these
@@ -88,9 +94,9 @@ public interface TransformationFromSize extends F1<Transformation3, Vec3> {
 			mp = m.p12();
 		}
 
-		@Override public Vec3 at(Vec3 p) { return p.mul(m).add(a); }
-		@Override public double at(double x0) {return x0 * mx + ax; }
-		@Override public Transformation2 slice0(double x0) {return p -> p.mul(mp).add(ap); }
+		@Override public Vec3 at(Vec3 p) { return p.mulAdd(m, a); }
+		@Override public double at(double x0) { return x0 * mx + ax; }
+		@Override public Transformation2 slice0(double x0) { return p -> p.mulAdd(mp, ap); }
 	}
 	
 	
@@ -111,9 +117,9 @@ public interface TransformationFromSize extends F1<Transformation3, Vec3> {
 			mp = m.p12();
 		}
 
-		@Override public Vec3 at(Vec3 p) { return p.mul(m).add(a); }
-		@Override public double at(double x0) {return x0 * mx + ax; }
-		@Override public Transformation2 slice0(double x0) {return p -> p.mul(mp).add(ap); }
+		@Override public Vec3 at(Vec3 p) { return p.mulAdd(m, a); }
+		@Override public double at(double x0) { return x0 * mx + ax; }
+		@Override public Transformation2 slice0(double x0) { return p -> p.mulAdd(mp, ap); }
 	}
 	
 	
@@ -135,9 +141,9 @@ public interface TransformationFromSize extends F1<Transformation3, Vec3> {
 			ap = a.p12();
 		}
 		
-		@Override public Vec3 at(Vec3 p) { return p.mul(m).add(a); }
-		@Override public double at(double x0) {return x0 * mx + ax; }
-		@Override public Transformation2 slice0(double x0) {return p -> p.mul(mp).add(ap); }
+		@Override public Vec3 at(Vec3 p) { return p.mulAdd(m, a); }
+		@Override public double at(double x0) { return x0 * mx + ax; }
+		@Override public Transformation2 slice0(double x0) { return p -> p.mulAdd(mp, ap); }
 	}
 
 	
@@ -158,9 +164,9 @@ public interface TransformationFromSize extends F1<Transformation3, Vec3> {
 			ap = a.p12();
 		}
 		
-		@Override public Vec3 at(Vec3 p) { return p.mul(m).add(a); }
-		@Override public double at(double x0) {return x0 * mx + ax; }
-		@Override public Transformation2 slice0(double x0) {return p -> p.mul(mp).add(ap); }
+		@Override public Vec3 at(Vec3 p) { return p.mulAdd(m, a); }
+		@Override public double at(double x0) { return x0 * mx + ax; }
+		@Override public Transformation2 slice0(double x0) { return p -> p.mulAdd(mp, ap); }
 	}
 	
 }

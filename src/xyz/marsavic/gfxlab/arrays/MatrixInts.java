@@ -10,7 +10,7 @@ import java.util.Arrays;
 public final class MatrixInts implements Matrix<Integer> {
 	
 	private final int width, height;
-	private final int[] data;   // TODO test an implementation with int[][] and compare performances.
+	private final int[] data;
 	
 	
 	
@@ -68,20 +68,16 @@ public final class MatrixInts implements Matrix<Integer> {
 	
 	public void copyFrom(MatrixInts source) {
 		Array2.assertEqualSizes(this, source);
-		System.arraycopy(source.data, 0, data, 0, source.data.length);
-/*
-		// Optimize: Test if doing it in parallel is faster.
-		UtilsGL.parallel(height, y -> {
+		UtilsGL.parallel.parallel(height, y -> {
 			int o = y * width;
-			System.arraycopy(source.array(), o, data, o, width);
+			System.arraycopy(source.data, o, data, o, width);
 		});
-*/
 	}
 	
 	
 	@Override
 	public void fill(Integer value) {
-		Arrays.fill(data, value);   // Optimize: Parallelism on blocks might be faster?
+		Arrays.fill(data, value);
 	}
 	
 	

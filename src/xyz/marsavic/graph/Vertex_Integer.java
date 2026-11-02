@@ -4,8 +4,9 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Spinner;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import xyz.marsavic.javafx.UtilsFX;
 import xyz.marsavic.reactions.elements.Element;
-import xyz.marsavic.reactions.elements.ElementInteger;
+import xyz.marsavic.reactions.elements.ElementValue;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,13 +14,13 @@ import java.util.List;
 
 public class Vertex_Integer extends HBox implements Vertex {
 	
-	public final ElementInteger element;
+	public final ElementValue<Integer> element;
 	
 	public final VertexOutputJack vertexOutputJack;
 	public final List<VertexOutputJack> outputJacks;
 	
 	
-	public Vertex_Integer(ElementInteger element) {
+	public Vertex_Integer(ElementValue<Integer> element) {
 		this.element = element;
 		
 		getStyleClass().add("vertex");
@@ -31,7 +32,7 @@ public class Vertex_Integer extends HBox implements Vertex {
 		Integer value = element.out.get();
 		spinner.getValueFactory().setValue(value);
 		
-		spinner.valueProperty().addListener((observable, oldValue, newValue) -> update(newValue));
+		UtilsFX.makeEditable(spinner, "-?\\d*", Integer::valueOf, 0, this::update);
 		
 		
 		setAlignment(Pos.CENTER_LEFT);

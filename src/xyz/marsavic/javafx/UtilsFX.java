@@ -8,6 +8,8 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
@@ -18,8 +20,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
+import javafx.util.StringConverter;
 import xyz.marsavic.functions.A1;
 import xyz.marsavic.functions.F0;
+import xyz.marsavic.functions.F1;
 import xyz.marsavic.geometry.Box;
 import xyz.marsavic.geometry.Interval;
 import xyz.marsavic.geometry.Vector;
@@ -33,40 +37,12 @@ import java.io.*;
 import java.nio.IntBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class UtilsFX {
 	
-	private static class DaemonThreadFactory implements ThreadFactory {
-		// TODO move to Utils
-		private static final AtomicInteger poolNumber = new AtomicInteger(1);
-		private final ThreadGroup group;
-		private final AtomicInteger threadNumber = new AtomicInteger(1);
-		private final String namePrefix;
-		
-		DaemonThreadFactory() {
-			group = Thread.currentThread().getThreadGroup();
-			namePrefix = "pool-" + poolNumber.getAndIncrement() + "-thread-";
-		}
-		
-		public Thread newThread(Runnable r) {
-			Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
-			t.setDaemon(true);
-			if (t.getPriority() != Thread.NORM_PRIORITY) {
-				t.setPriority(Thread.NORM_PRIORITY);
-			}
-			return t;
-		}
-	}
-	
-	/** To be used with tasks invoked from the JavaFX thread. */
-	public static ExecutorService executor =
-			Executors.newFixedThreadPool(
-					Runtime.getRuntime().availableProcessors(),
-					new DaemonThreadFactory()
-			);
+	/** To be used with tasks invoked from the JavaFX thread. A virtual thread per task, because the tasks mostly wait for the computation pools. */
+	public static ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 	
 	
 	public static <R> void submitTask(F0<R> f, A1<R> onFxThread) {
@@ -84,7 +60,43 @@ public class UtilsFX {
 	public static void toggle(Pane parent, Node child) {
 		ListUtils.toggle(parent.getChildren(), child);
 	}
-	
+
+
+	/**
+	 * Makes the spinner editable. Only text matching regex can be typed. Committing the text never throws: an empty
+	 * text gives zero, and a text that parse cannot convert (parse throws) restores the previous value. onChange
+	 * receives each new value. Values are shown by toString, so that committing the shown text gives the same value.
+	 */
+	public static <T> void makeEditable(Spinner<T> spinner, String regex, F1<T, String> parse, T zero, A1<T> onChange) {
+		spinner.setEditable(true);
+		spinner.getEditor().setTextFormatter(new TextFormatter<>(c -> c.getControlNewText().matches(regex) ? c : null));
+		spinner.getValueFactory().setConverter(new StringConverter<>() {
+			@Override
+			public String toString(T value) {
+				return value == null ? "" : value.toString();
+			}
+
+			@Override
+			public T fromString(String text) {
+				if (text.isEmpty()) {
+					return zero;
+				}
+				try {
+					return parse.at(text);
+				} catch (RuntimeException e) {
+					return null; // The listener below restores the previous value.
+				}
+			}
+		});
+		spinner.valueProperty().addListener((_, valueOld, value) -> {
+			if (value == null) {
+				spinner.getValueFactory().setValue(valueOld);
+			} else if (valueOld != null) { // Not the restoring of the previous value.
+				onChange.at(value);
+			}
+		});
+	}
+
 	
 	// Converters mars-bits <=> JavaFx ==================================================
 

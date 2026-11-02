@@ -62,7 +62,7 @@ public class Blobs implements ColorFunction3 {
 		Vector q = p.f(x -> x*0.495 + 0.5).add(p.normalizedTo(o).mul(0.01)).mul(64);
 		return (k < 0 ?
 				Color.gray(0.5 * (q.xInt() ^ q.yInt()) / 64.0 * v) :
-				Color.okhcl(mpToZo(p.y()) + t, 0.13, 0.8)
+				Color.oklch(0.8, 0.13, mpToZo(p.y()) + t)
 		).mul(Math.abs(k));
 	}
 	
@@ -86,7 +86,7 @@ public class Blobs implements ColorFunction3 {
 								e(TransformationFromSize.ToGeometricT0_.class),
 								e(Vec3.xyz(360, 640, 640)),
 								e(false),
-								e(true),
+								e(false),
 								e(Hash.class, e(0x8EE6B0C4E02CA7B2L))
 						),
 						e(ToneMapping2.class,

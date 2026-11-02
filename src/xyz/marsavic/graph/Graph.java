@@ -10,6 +10,7 @@ import javafx.scene.shape.Rectangle;
 import xyz.marsavic.geometry.Box;
 import xyz.marsavic.geometry.Vector;
 import xyz.marsavic.gfxlab.ElementAnimationSink;
+import xyz.marsavic.gfxlab.math.Vec3;
 import xyz.marsavic.javafx.UtilsFX;
 import xyz.marsavic.reactions.elements.*;
 
@@ -67,16 +68,19 @@ public class Graph extends Pane {
 	}
 
 	
+	// The casts of ElementValue are safe: the element's value has the type of the vertex, which sets only values of that type.
+	@SuppressWarnings("unchecked")
 	private Vertex createVertexByType(Element e) {
-//		if (e instanceof ElementAnimationSink   e_) return new Vertex_AnimationSinkImage (e_);
-		if (e instanceof ElementAnimationSink   e_) return new Vertex_AnimationSink      (e_);
-		if (e instanceof ElementDouble          e_) return new Vertex_Double             (e_);
-		if (e instanceof ElementInteger         e_) return new Vertex_Integer            (e_);
-		if (e instanceof ElementLong            e_) return new Vertex_Long               (e_);
-		if (e instanceof ElementBoolean         e_) return new Vertex_Boolean            (e_);
-		if (e instanceof ElementSingleOutput<?> e_) return new Vertex_ElementSingleOutput(e_);
-		if (e instanceof ElementA1<?>           e_) return new Vertex_ElementA1          (e_);
-		if (e instanceof Element                e_) return new Vertex_Default            (e_);
+//		if (e instanceof ElementAnimationSink   e_) return new Vertex_AnimationSink_Image (e_);
+		if (e instanceof ElementAnimationSink   e_) return new Vertex_AnimationSink_Canvas(e_);
+		if (e instanceof ElementValue<?> e_ && e_.result() instanceof Double ) return new Vertex_Double ((ElementValue<Double >) e_);
+		if (e instanceof ElementValue<?> e_ && e_.result() instanceof Integer) return new Vertex_Integer((ElementValue<Integer>) e_);
+		if (e instanceof ElementValue<?> e_ && e_.result() instanceof Long   ) return new Vertex_Long   ((ElementValue<Long   >) e_);
+		if (e instanceof ElementValue<?> e_ && e_.result() instanceof Boolean) return new Vertex_Boolean((ElementValue<Boolean>) e_);
+		if (e instanceof ElementValue<?> e_ && e_.result() instanceof Vec3   ) return new Vertex_Vec3   ((ElementValue<Vec3   >) e_);
+		if (e instanceof ElementSingleOutput<?> e_) return new Vertex_ElementSingleOutput (e_);
+		if (e instanceof ElementA1<?>           e_) return new Vertex_ElementA1           (e_);
+		if (e instanceof Element                e_) return new Vertex_Default             (e_);
 		return null;
 	}
 	

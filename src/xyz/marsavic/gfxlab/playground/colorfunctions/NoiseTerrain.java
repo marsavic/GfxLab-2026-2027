@@ -95,7 +95,7 @@ public final class NoiseTerrain implements ColorFunction3 {
 		double cr = mpToZo(sinT(crk*tr)) * mpToZo(sinT(crk * gang));
 		
 		return switch (mode) {
-			case 0 -> Color.okhcl(gang, 0.10*cr,  0.6*cr);
+			case 0 -> Color.oklch(0.6*cr, 0.10*cr, gang);
 			case 1 -> Color.hsb(gang, 1.0,  cr);
 			case 2 -> Color.gray(tr);
 			case 3 -> Color.hsb(gang, glen, 1.0);

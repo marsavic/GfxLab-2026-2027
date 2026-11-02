@@ -1,11 +1,14 @@
 package xyz.marsavic.gfxlab.playground.colorfunctions;
 
-import xyz.marsavic.gfxlab.entry_points.*;
-import xyz.marsavic.gfxlab.math.*;
 import xyz.marsavic.geometry.Vector;
-import xyz.marsavic.gfxlab.*;
+import xyz.marsavic.gfxlab.Animation;
+import xyz.marsavic.gfxlab.Color;
+import xyz.marsavic.gfxlab.ColorFunction3;
+import xyz.marsavic.gfxlab.TransformationFromSize;
 import xyz.marsavic.gfxlab.aggregation.AggregatorOneAhead;
 import xyz.marsavic.gfxlab.aggregation.EAggregator;
+import xyz.marsavic.gfxlab.entry_points.App;
+import xyz.marsavic.gfxlab.math.Vec3;
 import xyz.marsavic.gfxlab.tonemapping.ColorTransform;
 import xyz.marsavic.gfxlab.tonemapping.ToneMapping2;
 import xyz.marsavic.gfxlab.tonemapping.ToneMapping3;

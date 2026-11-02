@@ -63,7 +63,7 @@ public class AggregatorFrameLast extends Aggregator {
 		profilerLoop.measure(() -> {
 			iFrameAggregateLast.aggregate.addSample();
 		});
-		fireInvalidatedAsync(UtilsGL.parallelReactions.executorService()); // TODO Fire EventInvalidatedFrame instead
+		fireInvalidatedAsync(UtilsGL.parallelReactions); // TODO Fire EventInvalidatedFrame instead
 	}
 
 	private void loopFinalize() {

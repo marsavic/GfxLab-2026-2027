@@ -3,7 +3,6 @@ package xyz.marsavic.gfxlab.aggregation;
 import xyz.marsavic.gfxlab.arrays.*;
 import xyz.marsavic.gfxlab.math.*;
 import xyz.marsavic.functions.A1;
-import xyz.marsavic.functions.F1;
 import xyz.marsavic.gfxlab.*;
 import xyz.marsavic.reactions.Event;
 import xyz.marsavic.reactions.elements.ElementSingleOutput;
@@ -14,7 +13,7 @@ import xyz.marsavic.utils.Hash;
 
 
 /** The element of the graph editor that creates an aggregator from its inputs and outputs its frames. */
-public class EAggregator extends ElementSingleOutput<F1<Rr<Matrix<Color>>, Integer>> {
+public class EAggregator extends ElementSingleOutput<Frames<Color>> {
 	
 	public final Input<Aggregator.F_Aggregator> inFAggregator;
 	public final Input<ColorFunction3> inColorFunction;
@@ -86,13 +85,17 @@ public class EAggregator extends ElementSingleOutput<F1<Rr<Matrix<Color>>, Integ
 	} 
 
 	
+	// Delegates to the current aggregator, which getAggregator replaces when an input changes.
+	private final Frames<Color> frames = new Frames<>() {
+		@Override public Rr<Matrix<Color>> at(Integer t) { synchronized (lock) { return getAggregator().at(t);       } }
+		@Override public Vec3              size()        { synchronized (lock) { return getAggregator().size();      } }
+		@Override public boolean           repeats()     { synchronized (lock) { return getAggregator().repeats();   } }
+	};
+	
+	
 	@Override
-	public F1<Rr<Matrix<Color>>, Integer> result() {
-		return iFrame -> {
-			synchronized (lock) {
-				return getAggregator().rFrameAt(iFrame);
-			}
-		};
+	public Frames<Color> result() {
+		return frames;
 	}
 	
 	

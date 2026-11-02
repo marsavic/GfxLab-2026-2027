@@ -10,7 +10,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import xyz.marsavic.gfxlab.UtilsGL;
 import xyz.marsavic.reactions.elements.Element;
-import xyz.marsavic.reactions.elements.ElementDouble;
+import xyz.marsavic.reactions.elements.ElementValue;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.List;
 
 public class Vertex_Double extends HBox implements Vertex {
 	
-	public final ElementDouble element;
+	public final ElementValue<Double> element;
 	
 	public final VertexOutputJack vertexOutputJack;
 	public final List<VertexOutputJack> outputJacks;
@@ -27,7 +27,7 @@ public class Vertex_Double extends HBox implements Vertex {
 	ReadOnlyObjectProperty<Integer> pExponent;
 	
 	
-	public Vertex_Double(ElementDouble element) {
+	public Vertex_Double(ElementValue<Double> element) {
 		this.element = element;
 		
 		getStyleClass().add("vertex");

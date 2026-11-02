@@ -1,12 +1,15 @@
 package xyz.marsavic.gfxlab.playground.colorfunctions;
 
-import xyz.marsavic.gfxlab.entry_points.*;
-import xyz.marsavic.gfxlab.math.*;
 import xyz.marsavic.geometry.Vector;
-import xyz.marsavic.gfxlab.*;
-import xyz.marsavic.gfxlab.aggregation.AggregatorOneAhead;
+import xyz.marsavic.gfxlab.Animation;
+import xyz.marsavic.gfxlab.Color;
+import xyz.marsavic.gfxlab.ColorFunction3;
+import xyz.marsavic.gfxlab.TransformationFromSize;
 import xyz.marsavic.gfxlab.aggregation.AggregatorFixed;
+import xyz.marsavic.gfxlab.aggregation.AggregatorFrameLast;
 import xyz.marsavic.gfxlab.aggregation.EAggregator;
+import xyz.marsavic.gfxlab.entry_points.App;
+import xyz.marsavic.gfxlab.math.Vec3;
 import xyz.marsavic.gfxlab.tonemapping.ColorTransform;
 import xyz.marsavic.gfxlab.tonemapping.ToneMapping2;
 import xyz.marsavic.gfxlab.tonemapping.ToneMapping3;
@@ -35,7 +38,7 @@ public class Black implements ColorFunction3 {
 		return
 				e(ToneMapping3.class,
 						new EAggregator(
-								e(AggregatorOneAhead::new),
+								e(AggregatorFrameLast::new),
 	                            e(Black.class
 						        ),
 								e(TransformationFromSize.ToIdentity_.class),

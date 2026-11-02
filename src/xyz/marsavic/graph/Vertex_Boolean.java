@@ -5,7 +5,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import xyz.marsavic.reactions.elements.Element;
-import xyz.marsavic.reactions.elements.ElementBoolean;
+import xyz.marsavic.reactions.elements.ElementValue;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,13 +13,13 @@ import java.util.List;
 
 public class Vertex_Boolean extends HBox implements Vertex {
 	
-	public final ElementBoolean element;
+	public final ElementValue<Boolean> element;
 	
 	public final VertexOutputJack vertexOutputJack;
 	public final List<VertexOutputJack> outputJacks;
 	
 	
-	public Vertex_Boolean(ElementBoolean element) {
+	public Vertex_Boolean(ElementValue<Boolean> element) {
 		this.element = element;
 		
 		getStyleClass().add("vertex");

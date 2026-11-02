@@ -1,10 +1,10 @@
 package xyz.marsavic.gfxlab.tonemapping;
 
 import xyz.marsavic.functions.F1;
-import xyz.marsavic.gfxlab.arrays.Array2;
 import xyz.marsavic.gfxlab.Color;
-import xyz.marsavic.gfxlab.arrays.Matrix;
 import xyz.marsavic.gfxlab.UtilsGL;
+import xyz.marsavic.gfxlab.arrays.Array2;
+import xyz.marsavic.gfxlab.arrays.Matrix;
 import xyz.marsavic.resources.Br;
 import xyz.marsavic.resources.Rr;
 
@@ -25,5 +25,5 @@ public record ToneMapping2(
 			return rMatI;
 		});
 	}
-	
+
 }

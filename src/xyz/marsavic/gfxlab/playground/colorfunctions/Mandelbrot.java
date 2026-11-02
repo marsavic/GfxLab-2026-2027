@@ -44,7 +44,7 @@ public class Mandelbrot implements ColorFunction3 {
 			y = 2 * x * y + c.y();
 			x = x_;
 			if (x * x + y * y > 4) {
-				return Color.okhcl(k / 40.0, 0.1, 0.75);
+				return Color.oklch(0.75, 0.1, k / 40.0);
 			}
 		}
 		return Color.BLACK;

@@ -7,7 +7,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.util.StringConverter;
 import xyz.marsavic.reactions.elements.Element;
-import xyz.marsavic.reactions.elements.ElementLong;
+import xyz.marsavic.reactions.elements.ElementValue;
 
 import java.util.Collection;
 import java.util.List;
@@ -15,13 +15,13 @@ import java.util.List;
 
 public class Vertex_Long extends HBox implements Vertex {
 	
-	public final ElementLong element;
+	public final ElementValue<Long> element;
 	
 	public final VertexOutputJack vertexOutputJack;
 	public final List<VertexOutputJack> outputJacks;
 	
 	
-	public Vertex_Long(ElementLong element) {
+	public Vertex_Long(ElementValue<Long> element) {
 		this.element = element;
 		
 		getStyleClass().add("vertex");

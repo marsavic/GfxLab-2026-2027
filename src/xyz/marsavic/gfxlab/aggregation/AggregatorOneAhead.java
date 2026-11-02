@@ -28,7 +28,7 @@ public class AggregatorOneAhead extends Aggregator {
 	
 	
 	private void startGettingAhead(int iFrame) {
-		frFrameAhead = UtilsGL.parallelReactions.submit(() -> rFrameCompute(iFrame));
+		frFrameAhead = UtilsGL.parallelWaiting.submit(() -> rFrameCompute(iFrame));
 	}
 	
 	
@@ -59,7 +59,7 @@ public class AggregatorOneAhead extends Aggregator {
 	
 	private void releaseRFrameAhead() {
 		var frFrame_ = frFrameAhead;
-		UtilsGL.parallelReactions.submit(() -> Parallel.futureGet(frFrame_).release());
+		UtilsGL.parallelWaiting.submit(() -> Parallel.futureGet(frFrame_).release());
 	}
 	
 	
