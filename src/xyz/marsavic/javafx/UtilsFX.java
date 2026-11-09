@@ -258,9 +258,15 @@ public class UtilsFX {
 			});
 		}
 	}
-	
-	
-	
+
+
+	/** The JavaFX color that shows the color c on the screen, with the components of c first clamped to [0, 1]. */
+	public static javafx.scene.paint.Color toFX(Color c) {
+		int code = c.codeClamp();
+		return javafx.scene.paint.Color.rgb((code >> 16) & 0xFF, (code >> 8) & 0xFF, code & 0xFF);
+	}
+
+
 	public static MatrixColor matrixFromImage(Image img) {
 		Vector size = UtilsFX.imageSize(img);
 		MatrixColor matrixColor = new MatrixColor(size);

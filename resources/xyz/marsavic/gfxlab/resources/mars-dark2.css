@@ -324,6 +324,12 @@ hsl(220, 13%, 18%)
     -fx-background-color: hsba(240, 40%, 75%, 0.5);
 }
 
+.color-popup
+{
+    -fx-border-color: hsba(240, 40%, 75%, 0.375);
+    -fx-border-width: 1;
+}
+
 .vertex-double > .spinner
 {
     /*-fx-text-alignment: right;*/

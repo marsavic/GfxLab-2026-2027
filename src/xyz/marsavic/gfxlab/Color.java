@@ -325,9 +325,9 @@ public record Color(
 	}
 	
 	
-	/** The linear interpolation between this (t = 0) and o (t = 1). */
-	public Color lerp(Color o, double t) {
-		return this.add(o.sub(this).mul(t));
+	/** The linear interpolation (1 - k) c0 + k c1. */
+	public static Color lerp(Color c0, Color c1, double k) {
+		return c0.mul(1 - k).add(c1.mul(k));
 	}
 	
 	

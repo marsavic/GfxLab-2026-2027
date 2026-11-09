@@ -1,11 +1,11 @@
 <component name="libraryTable">
   <library name="mars-bits">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/mars-bits-2026-11-02.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/mars-bits-2026-11-09.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="jar://$PROJECT_DIR$/lib/mars-bits-2026-11-02.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/mars-bits-2026-11-09.jar!/" />
     </SOURCES>
   </library>
 </component>

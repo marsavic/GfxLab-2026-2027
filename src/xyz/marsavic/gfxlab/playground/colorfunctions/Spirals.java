@@ -48,7 +48,7 @@ public record Spirals(
 										, e(0.25)
 										, e(0.4)
 								),
-								e(TransformationFromSize.ToGeometricT0_.class),
+								e(TransformationFromSize.ToGeometricFitT0_.class),
 								e(Vec3.xyz(360, 640, 640)),
 								e(true),
 								e(false),

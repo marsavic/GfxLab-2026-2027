@@ -56,7 +56,7 @@ public class BarycentricTriangle implements ColorFunction3 {
 						new EAggregator(
 								e(AggregatorFrameLast::new),
 								e(BarycentricTriangle.class),
-								e(TransformationFromSize.ToGeometricT0_.class),
+								e(TransformationFromSize.ToGeometricFitT0_.class),
 								e(Vec3.xyz(1, 640, 640)),
 								e(true),
 								e(false),

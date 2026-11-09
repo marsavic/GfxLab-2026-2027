@@ -83,7 +83,7 @@ public class Blobs implements ColorFunction3 {
 										, e(0.2)
 										, e(Hash.class, e(0xB182847F9F621EB1L))
 								),
-								e(TransformationFromSize.ToGeometricT0_.class),
+								e(TransformationFromSize.ToGeometricFitT0_.class),
 								e(Vec3.xyz(360, 640, 640)),
 								e(false),
 								e(false),

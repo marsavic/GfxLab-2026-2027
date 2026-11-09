@@ -31,6 +31,8 @@ public class Resources {
 		// https://kordamp.org/ikonli/cheat-sheet-materialdesign2.html
 		public static final Ikon COPY = MaterialDesignC.CONTENT_COPY;
 		public static final Ikon SAVE = MaterialDesignC.CONTENT_SAVE;
+		public static final Ikon OK = MaterialDesignC.CHECK;
+		public static final Ikon CANCEL = MaterialDesignC.CLOSE;
 	}
 	
 }

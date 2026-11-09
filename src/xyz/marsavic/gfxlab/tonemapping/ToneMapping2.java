@@ -13,13 +13,13 @@ import xyz.marsavic.resources.Rr;
  * converts the colors into pixel codes.
  */
 public record ToneMapping2(
-		F1<ColorTransform, Array2<Color>> fColorTransformToMatrixColor
+		F1<ColorTransform, Array2<Color>> fColorTransformFromMatrixColor
 ) implements F1<Rr<Matrix<Integer>>, Br<Matrix<Color>>> {
 	
 	@Override
 	public Rr<Matrix<Integer>> at(Br<Matrix<Color>> bMC) {
 		return bMC.f(mC -> {
-			ColorTransform f = fColorTransformToMatrixColor.at(mC);
+			ColorTransform f = fColorTransformFromMatrixColor.at(mC);
 			Rr<Matrix<Integer>> rMatI = UtilsGL.matricesInt.obtain(mC.size(), true);
 			rMatI.a(mI -> mI.fill(p -> f.at(mC.at(p)).code()));
 			return rMatI;

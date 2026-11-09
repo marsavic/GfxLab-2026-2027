@@ -1,0 +1,105 @@
+package xyz.marsavic.gfxlab.graphics3d.solids;
+
+import xyz.marsavic.functions.F1;
+import xyz.marsavic.geometry.Vector;
+import xyz.marsavic.gfxlab.graphics3d.Hit;
+import xyz.marsavic.gfxlab.graphics3d.Material;
+import xyz.marsavic.gfxlab.graphics3d.Ray;
+import xyz.marsavic.gfxlab.graphics3d.Solid;
+import xyz.marsavic.gfxlab.math.Vec3;
+import xyz.marsavic.utils.Numeric;
+
+
+public class Ball implements Solid {
+	
+	private final Vec3 c;
+	private final double r;
+	private final F1<Material, Vector> mapMaterial;
+	
+	// transient
+	private final double rSqr;
+	private final double rInv;
+	
+	
+	/** Negative r will make the ball inverted (the resulting solid is a complement of a ball). */
+	private Ball(Vec3 c, double r, F1<Material, Vector> mapMaterial) {
+		this.c = c;
+		this.r = r;
+		this.mapMaterial = mapMaterial;
+		
+		rSqr = r * r;
+		rInv = 1 / r;
+	}
+	
+	public static Ball cr(Vec3 c, double r, F1<Material, Vector> mapMaterial) {
+		return new Ball(c, r, mapMaterial);
+	}
+	
+	public static Ball cr(Vec3 c, double r) {
+		return new Ball(c, r, Material.DEFAULT);
+	}
+	
+	public Ball material(F1<Material, Vector> mapMaterial) {
+		return new Ball(c, r, mapMaterial);
+	}
+	
+	
+	public Vec3 c() {
+		return c;
+	}
+	
+	public double r() {
+		return r;
+	}
+	
+	
+	@Override
+	public Hit firstHit(Ray ray, double afterTime) {
+		Vec3 e = c().sub(ray.p());                                // Vector from the ray origin to the ball center
+		
+		double dSqrInv = 1 / ray.d().lengthSquared();
+		double tM = e.dot(ray.d()) * dSqrInv;                     // Time at which the ray is closest to the center
+		double dtSqr = tM * tM - (e.lengthSquared() - rSqr) * dSqrInv;
+		
+		if (dtSqr > 0) {
+			double dt = Math.sqrt(dtSqr);
+			if (tM - dt > afterTime) return new HitBall(ray, tM - dt);
+			if (tM + dt > afterTime) return new HitBall(ray, tM + dt);
+		}
+		return Hit.AtPositiveInfinity.axisAligned(ray.d(), r < 0);
+	}
+	
+	
+	class HitBall extends Hit.RayT {
+		
+		protected HitBall(Ray ray, double t) {
+			super(ray, t);
+		}
+		
+		@Override
+		public Vec3 n() {
+			return ray().at(t()).sub(c()).mul(rInv);              // Divided by r, not |r|: for an inverted ball (r < 0), the normal points to the center, which is outside the solid.
+		}
+		
+		@Override
+		public Material material() {
+			return mapMaterial.at(uv());
+		}
+		
+		@Override
+		public Vector uv() {
+			Vec3 n = n_();                                    // For inverted balls, n_ is flipped, so the texture is everted.
+			return Vector.xy(
+					Numeric.atan2T(n.y(), n.x()),                 // Longitude (around z) and latitude, so that (u, v, n) is a positive basis.
+					4 * Numeric.asinT(n.z())
+			);
+		}
+		
+		@Override
+		public Vec3 n_() {
+			return n();
+		}
+		
+	}
+	
+}

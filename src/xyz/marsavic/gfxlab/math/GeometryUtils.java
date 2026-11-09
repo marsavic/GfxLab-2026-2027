@@ -51,5 +51,27 @@ public final class GeometryUtils {
 			return Vec3.xyz(0, -v.z() * lInv, v.y() * lInv);
 		}
 	}
+
+	/** The vector d reflected over the line with direction n (n need not be normalized). */
+	public static Vec3 reflected(Vec3 n, Vec3 d) {
+		throw new UnsupportedOperationException();
+	}
+	
+	
+	/** The vector d reflected over the line with direction n_ (n_ must be normalized). */
+	public static Vec3 reflectedN(Vec3 n_, Vec3 d) {
+		throw new UnsupportedOperationException();
+	}
+	
+	
+	/**
+	 * The direction of the refracted ray, for the normalized normal n_ and the normalized direction i_ towards the
+	 * incoming ray. When n_ and i_ are on the same side of the surface, the light passes into the medium with the
+	 * relative refractive index refractiveIndex (otherwise it passes out of it). In the case of total internal
+	 * reflection, the reflected direction is returned. The result is not normalized.
+	 */
+	public static Vec3 refractedNN(Vec3 n_, Vec3 i_, double refractiveIndex) {
+		throw new UnsupportedOperationException();
+	}
 	
 }

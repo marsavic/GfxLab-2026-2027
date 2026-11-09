@@ -9,6 +9,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 import xyz.marsavic.geometry.Box;
 import xyz.marsavic.geometry.Vector;
+import xyz.marsavic.gfxlab.Color;
 import xyz.marsavic.gfxlab.ElementAnimationSink;
 import xyz.marsavic.gfxlab.math.Vec3;
 import xyz.marsavic.javafx.UtilsFX;
@@ -78,6 +79,7 @@ public class Graph extends Pane {
 		if (e instanceof ElementValue<?> e_ && e_.result() instanceof Long   ) return new Vertex_Long   ((ElementValue<Long   >) e_);
 		if (e instanceof ElementValue<?> e_ && e_.result() instanceof Boolean) return new Vertex_Boolean((ElementValue<Boolean>) e_);
 		if (e instanceof ElementValue<?> e_ && e_.result() instanceof Vec3   ) return new Vertex_Vec3   ((ElementValue<Vec3   >) e_);
+		if (e instanceof ElementValue<?> e_ && e_.result() instanceof Color  ) return new Vertex_Color  ((ElementValue<Color  >) e_);
 		if (e instanceof ElementSingleOutput<?> e_) return new Vertex_ElementSingleOutput (e_);
 		if (e instanceof ElementA1<?>           e_) return new Vertex_ElementA1           (e_);
 		if (e instanceof Element                e_) return new Vertex_Default             (e_);
