@@ -148,8 +148,9 @@ public class UtilsFX {
 	}
 */
 	
+	/** The box of the primary screen that windows can use: without the taskbars and docks. */
 	public static Box getScreenBox() {
-		return box(Screen.getPrimary().getBounds());
+		return box(Screen.getPrimary().getVisualBounds());
 	}
 	
 	

@@ -18,7 +18,7 @@ public class Aggregate {
 	private final Hash hash;
 	
 
-	private State state; // Read and replaced only while holding the monitor of this.
+	private State state; // Read and replaced only while holding the monitor of this. Null after release.
 
 	// Held for the whole addSample, so that samples are added one at a time and release waits for the current sample.
 	// The monitor of this is held only briefly, so that the average can be computed while a sample is being added.
@@ -83,12 +83,14 @@ public class Aggregate {
 			synchronized (this) {
 				if (state != null) {
 					state.release();
+					state = null;
 				}
 			}
 		}
 	}
 
 
+	/** Does nothing if this aggregate is released. AggregatorFrameLast can call it on an aggregate that a frame change has just released. */
 	public void addSample() {
 		synchronized (lockSampling) {
 			// Instead of rewriting the same "sum" matrix, we borrow a new one and release the old one. This is
@@ -96,6 +98,9 @@ public class Aggregate {
 			// added the new sample in-place, but it's more troublesome.
 
 			State stateOld = getState();
+			if (stateOld == null) {
+				return;
+			}
 			Hash hashFrame = hash.add(stateOld.count);
 			State stateNew = new State(stateOld.count + 1, UtilsGL.matricesColor.obtain(size, true));
 			int sizeX = size.xInt();

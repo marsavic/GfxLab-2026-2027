@@ -73,7 +73,7 @@ public class Graph extends Pane {
 	@SuppressWarnings("unchecked")
 	private Vertex createVertexByType(Element e) {
 //		if (e instanceof ElementAnimationSink   e_) return new Vertex_AnimationSink_Image (e_);
-		if (e instanceof ElementAnimationSink   e_) return new Vertex_AnimationSink_Canvas(e_);
+		if (e instanceof ElementAnimationSink   e_) return new Vertex_AnimationSink(e_);
 		if (e instanceof ElementValue<?> e_ && e_.result() instanceof Double ) return new Vertex_Double ((ElementValue<Double >) e_);
 		if (e instanceof ElementValue<?> e_ && e_.result() instanceof Integer) return new Vertex_Integer((ElementValue<Integer>) e_);
 		if (e instanceof ElementValue<?> e_ && e_.result() instanceof Long   ) return new Vertex_Long   ((ElementValue<Long   >) e_);

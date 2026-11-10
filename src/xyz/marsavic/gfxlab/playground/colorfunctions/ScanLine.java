@@ -23,7 +23,7 @@ public class ScanLine implements ColorFunction3 {
 	
 	@Override
 	public Color at(double t, Vector p) {
-		int k = Math.floorMod((long) (16 * t), 640);
+		int k = Math.floorMod((long) (16*t), 640);
 		return (p.xInt() == k || p.yInt() == k) ? Color.WHITE : Color.BLACK;
 	}
 
@@ -38,11 +38,9 @@ public class ScanLine implements ColorFunction3 {
 				e(ToneMapping3.class,
 						new EAggregator(
 								e(AggregatorOneAhead::new),
-//								e(AggregatorFixed.constructor(64)),
-	        					e(ScanLine.class
-						        ),
+	        					e(ScanLine.class),
 								e(TransformationFromSize.ToIdentity_.class),
-								e(Vec3.xyz(360, 640, 640)),
+								e(Vec3.xyz(640, 640, 640)),
 								e(true),								
 								e(true),								
 								e(Hash.class, e(0x8EE6B0C4E02CA7B2L))

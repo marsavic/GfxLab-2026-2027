@@ -9,6 +9,19 @@ rgb(40, 44, 52)
 hsl(220, 13%, 18%)
 */
 
+/* JetBrains Mono 2.304 is bundled (SIL Open Font License, fonts/OFL.txt), so that the interface looks the same on all
+   systems. JavaFX loads each file and registers it under the family and style names stored in the file. */
+@font-face {
+    font-family: "JetBrains Mono";
+    src: url("fonts/JetBrainsMono-Regular.ttf");
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    font-weight: bold;
+    src: url("fonts/JetBrainsMono-Bold.ttf");
+}
+
 .root {
     -fx-accent-active: hsb(145,  75.0%,  92%);
     -fx-accent       : hsb(145,  75.0%,  84%);
@@ -231,6 +244,16 @@ hsl(220, 13%, 18%)
     -fx-padding: 3;
 }
 
+.tooltip
+{
+    -fx-background-color: hsba(240, 10%, 25%, 0.9);  /* Modena: rgba(30, 30, 30, 0.8) */
+}
+
+.choice-box > .label
+{
+    -fx-padding: 0 0.666667em;  /* Modena's vertical padding leaves too little of the label height (21) for the text. */
+}
+
 
 .scroll-bar
 {
@@ -251,7 +274,8 @@ hsl(220, 13%, 18%)
 .button,
 .toggle-button,
 .text-field,
-.text-area
+.text-area,
+.tooltip  /* Modena's size, 0.85em, is relative to the font of the owner control, which differs between controls. */
 /*.combo-box-base .arrow-button,*/
 /*.spinner,*/
 /*.spinner > .increment-arrow-button,*/
@@ -260,7 +284,7 @@ hsl(220, 13%, 18%)
 /*.scroll-bar > .increment-button,*/
 /*.scroll-bar > .decrement-button*/
 {
-    -fx-font-family: "JetBrains Mono", "Ubuntu Mono", "Consolas", monospace;
+    -fx-font-family: "JetBrains Mono";
     /*-fx-font-family: "Consolas";*/
     -fx-font-size: 14;
 }
@@ -334,4 +358,32 @@ hsl(220, 13%, 18%)
 {
     /*-fx-text-alignment: right;*/
     -fx-max-width: 60;
+}
+
+/* Widths for 5 digits. A character of JetBrains Mono at 14 px is 8.4 px wide. */
+
+.vertex-animation-sink .spinner
+{
+    /* 5 digits (42) + text field padding (16.4) + arrow buttons (27). The preferred width of SpinnerSkin is the
+       preferred width of the text field only, and the arrow buttons take their width from it. */
+    -fx-pref-width: 86;
+}
+
+.vertex-animation-sink .spinner > .text-field,
+.vertex-animation-sink .label.frame-index,
+.vertex-animation-sink .label.frame-time
+{
+    -fx-alignment: center-right;
+}
+
+.vertex-animation-sink .label.frame-index
+{
+    -fx-min-width : 42;  /* 5 digits */
+    -fx-pref-width: 42;
+}
+
+.vertex-animation-sink .label.frame-time
+{
+    -fx-min-width : 59;  /* 7 characters, up to 9999.99: the time of a 5-digit frame index at 10 fps or more */
+    -fx-pref-width: 59;
 }

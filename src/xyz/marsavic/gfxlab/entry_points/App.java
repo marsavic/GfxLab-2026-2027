@@ -21,6 +21,7 @@ import xyz.marsavic.utils.FileWatcher;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 
 public class App extends Application {
@@ -111,8 +112,13 @@ public class App extends Application {
 		
 		textArea.setMouseTransparent(true);
 		
-		Vector sceneSize = UtilsFX.getScreenBox().x().d() < 2400 ? Vector.xy(1840, 1000) : Vector.xy(2400, 1200);
-		Scene scene = new Scene(root, sceneSize.x(), sceneSize.y());
+		// The larger size that fits the screen, or a maximized window if neither fits (e.g. a laptop with display scaling).
+		// JavaFX opens the window on the primary screen, unless the window manager places it (e.g. Sway, on the focused
+		// output).
+		Vector screenSize = UtilsFX.getScreenBox().d();
+		Vector sceneSize = Stream.of(Vector.xy(2400, 1200), Vector.xy(1840, 1000)).filter(screenSize::dominates).findFirst().orElse(null);
+		Scene scene = (sceneSize == null) ? new Scene(root) : new Scene(root, sceneSize.x(), sceneSize.y());
+		primaryStage.setMaximized(sceneSize == null);
 		
 		
 		scene.getStylesheets().setAll(Resources.stylesheetURL);
